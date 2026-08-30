@@ -4,7 +4,7 @@ coroutines = "1.11.0"
 kotest = "6.2.4"
 
 [libraries]
-colormath = "com.github.ajalt.colormath:colormath:3.6.1"
+colormath = "com.github.ajalt.colormath:colormath:3.7.0"
 markdown = "org.jetbrains:markdown:0.7.8"
 jna-core = "net.java.dev.jna:jna:5.19.1"
 

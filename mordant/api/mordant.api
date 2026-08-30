@@ -579,7 +579,9 @@ public final class com/github/ajalt/mordant/rendering/TextColors : java/lang/Enu
 	public fun toAnsi16 ()Lcom/github/ajalt/colormath/model/Ansi16;
 	public fun toAnsi256 ()Lcom/github/ajalt/colormath/model/Ansi256;
 	public fun toArray ()[F
+	public fun toCAM16 ()Lcom/github/ajalt/colormath/model/CAM16;
 	public fun toCMYK ()Lcom/github/ajalt/colormath/model/CMYK;
+	public fun toHCT ()Lcom/github/ajalt/colormath/model/HCT;
 	public fun toHPLuv ()Lcom/github/ajalt/colormath/model/HPLuv;
 	public fun toHSL ()Lcom/github/ajalt/colormath/model/HSL;
 	public fun toHSLuv ()Lcom/github/ajalt/colormath/model/HSLuv;
