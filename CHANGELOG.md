@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 3.1.0
 ### Added
 - Mouse events on POSIX systems now use the SGR protocol when the terminal supports it, which fixes coordinates in windows larger than 223 cells and adds horizontal wheel and extra button reporting. [(#289)](https://github.com/ajalt/mordant/issues/289)
 
