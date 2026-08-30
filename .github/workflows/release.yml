@@ -6,8 +6,8 @@ on:
       - '**'
 
 jobs:
-  release:
-    runs-on: macos-latest
+  publish:
+    runs-on: ubuntu-latest
     if: ${{ github.repository == 'ajalt/mordant' }}
     steps:
       - uses: actions/checkout@v7
@@ -15,35 +15,32 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: 25
-      - uses: actions/setup-python@v7
-        with:
-          python-version: '3.12'
       - uses: gradle/actions/setup-gradle@v6
-      - run: ./gradlew publishToMavenCentral --no-configuration-cache
+      # disable configuration cache due to https://github.com/gradle/gradle/issues/22779
+      - run: ./gradlew publishAndReleaseToMavenCentral --no-configuration-cache
         env:
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.ORG_GRADLE_PROJECT_mavenCentralPassword }}
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.ORG_GRADLE_PROJECT_signingInMemoryKey }}
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.ORG_GRADLE_PROJECT_mavenCentralUsername }}
-# Disabled due to https://github.com/ffurrer2/extract-release-notes/issues/339
-#      - name: Extract release notes
-#        id: extract-release-notes
-#        uses: ffurrer2/extract-release-notes@v2
-#      - name: Create release
-#        uses: ncipollo/release-action@v1
-#        with:
-#          body: ${{ steps.extract-release-notes.outputs.release_notes }}
-#      - name: Dokka
-#        run: ./gradlew dokkaGenerate
-#      - run : ./prepare_docs.sh
-#      - name: Build website
-#        run: |
-#          pip install zensical
-#          zensical build
-#      - name: Deploy docs to website
-#        uses: JamesIves/github-pages-deploy-action@v4
-#        with:
-#          branch: gh-pages
-#          folder: site
-env:
-  # macos-latest is now macos-14 and has less than half as much memory available as other runners
-  GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx6g -Dfile.encoding=UTF-8" -Dorg.gradle.configureondemand=true -Dorg.gradle.parallel=false -Dkotlin.incremental=false -Dorg.gradle.project.kotlin.incremental.multiplatform=false -Dorg.gradle.project.kotlin.native.disableCompilerDaemon=true
+  docs:
+    needs: publish
+    uses: ./.github/workflows/docs.yml
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+  github-release:
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - name: Extract the changelog entries for the tagged version
+        run: |
+          awk -v ver="$GITHUB_REF_NAME" '$0 == "## " ver {flag=1; next} /^## /{flag=0} flag' CHANGELOG.md > release_notes.md
+          test -s release_notes.md
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: release_notes.md
