@@ -3,6 +3,13 @@ plugins {
     id("mordant-publishing-conventions")
 }
 
+val posixSharedTargets = listOf(
+    "linuxX64", "linuxArm64",
+    "macosX64", "macosArm64",
+    "tvosX64", "tvosArm64", "tvosSimulatorArm64",
+    "watchosArm32", "watchosArm64", "watchosX64", "watchosSimulatorArm64",
+)
+
 kotlin {
     jvm()
     sourceSets {
@@ -34,14 +41,17 @@ kotlin {
             for (target in listOf(iosMain, tvosMain, watchosMain)) {
                 target.get().dependsOn(appleNonDesktopMain)
             }
-            for (target in listOf(
-                "linuxX64", "linuxArm64",
-                "macosX64", "macosArm64",
-                "tvosX64", "tvosArm64", "tvosSimulatorArm64",
-                "watchosArm32", "watchosArm64", "watchosX64", "watchosSimulatorArm64",
-            )) {
+            for (target in posixSharedTargets) {
                 sourceSets.getByName(target + "Main").kotlin.srcDirs("src/posixSharedMain/kotlin")
             }
         }
+    }
+}
+
+dokka {
+    // Dokka rejects source roots shared between source sets (https://github.com/Kotlin/dokka/issues/3701).
+    // These source sets contain nothing but the shared root, and everything in it is internal.
+    dokkaSourceSets.configureEach {
+        if (name.removeSuffix("Main") in posixSharedTargets) suppress.set(true)
     }
 }
